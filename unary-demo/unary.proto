@@ -1,0 +1,27 @@
+syntax = "proto3";
+package unary;
+
+service Unary{
+  // A simple unary RPC to send a command get the response code
+  rpc GetServerResponse(StartHoneypot) returns (StartHoneypotResponse) {}
+}
+
+message StartHoneypot{
+  uint32 hpType = 1;
+  uint32 ownerId = 2;
+  bool startAfterBuild = 3;
+  uint32 targetIp = 4;
+  uint32 targetSubnet = 5;
+  enum ResourceAllocation {
+    micro = 0;
+    small = 1;
+    medium = 2;
+    large = 3;
+  }
+  ResourceAllocation resourceAllocation = 6;
+}
+
+message StartHoneypotResponse{
+  bool success = 1;
+  uint32 errorCode = 2;
+}
