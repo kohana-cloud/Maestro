@@ -29,6 +29,13 @@ class UnaryClient(object):
             targetSubnet = 4294934528,
             resourceAllocation = 2
         )
+        
+        with open('unary.data','bw') as fio:
+            fio.write(message.SerializeToString())
+
+        with open('rest.data','tw') as fio:
+            fio.write("{hpType: 1, ownerId: 9876543120, startAfterBuild: True, targetIp: 192.168.1.1, subnetMask: 255.255.128.0, resourceAllocation: medium}")
+        
         print(f"Sending: {message}")
         return self.stub.GetServerResponse(message)
 

@@ -1,0 +1,1 @@
+{hpType: 1, ownerId: 9876543120, startAfterBuild: True, targetIp: 192.168.1.1, subnetMask: 255.255.128.0, resourceAllocation: medium}
