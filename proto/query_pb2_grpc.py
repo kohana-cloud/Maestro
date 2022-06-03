@@ -19,12 +19,23 @@ class QueryServerStub(object):
                 request_serializer=query__pb2.Empty.SerializeToString,
                 response_deserializer=query__pb2.Honeypots.FromString,
                 )
+        self.NewHoneypot = channel.unary_unary(
+                '/grpc.QueryServer/NewHoneypot',
+                request_serializer=query__pb2.Honeypot.SerializeToString,
+                response_deserializer=query__pb2.ReturnCode.FromString,
+                )
 
 
 class QueryServerServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def GetHoneypots(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def NewHoneypot(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -37,6 +48,11 @@ def add_QueryServerServicer_to_server(servicer, server):
                     servicer.GetHoneypots,
                     request_deserializer=query__pb2.Empty.FromString,
                     response_serializer=query__pb2.Honeypots.SerializeToString,
+            ),
+            'NewHoneypot': grpc.unary_unary_rpc_method_handler(
+                    servicer.NewHoneypot,
+                    request_deserializer=query__pb2.Honeypot.FromString,
+                    response_serializer=query__pb2.ReturnCode.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -62,5 +78,22 @@ class QueryServer(object):
         return grpc.experimental.unary_unary(request, target, '/grpc.QueryServer/GetHoneypots',
             query__pb2.Empty.SerializeToString,
             query__pb2.Honeypots.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def NewHoneypot(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/grpc.QueryServer/NewHoneypot',
+            query__pb2.Honeypot.SerializeToString,
+            query__pb2.ReturnCode.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
