@@ -5,6 +5,7 @@ import proto.query_pb2 as query
 import grpc
 from datetime import datetime
 from src.Honeypots import ingest_honeypots
+from src.aws_session import AWS_Session
 import json, time
 
 SERVER_PORT = 15001
@@ -92,4 +93,6 @@ def server(tls=True):
     server.wait_for_termination()
 
 if __name__ == '__main__':
+    aws_internal_session = AWS_Session()
+    #aws_internal_session.get_all_services()
     server(tls=False)
