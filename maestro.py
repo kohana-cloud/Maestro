@@ -54,6 +54,7 @@ honeypots = {
     }
 }
 
+
 class QueryServer(rpc.QueryServer):
     def __init__(self): pass
 
@@ -74,8 +75,9 @@ class QueryServer(rpc.QueryServer):
         
         return query.ReturnCode()
 
-def server(tls=True):
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+
+def start_server(tls=True):
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=1000))
     rpc.add_QueryServerServicer_to_server(QueryServer(), server)
 
     if tls:
@@ -91,5 +93,5 @@ def server(tls=True):
     server.start()
     server.wait_for_termination()
 
-if __name__ == '__main__':
-    server(tls=False)
+
+if __name__ == '__main__': start_server()

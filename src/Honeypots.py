@@ -1,36 +1,72 @@
 import yaml
+import time
 
 class Honeypot():
-    def __init__(self, id:str, owner_email:str, owner_name:str, health:str, last_update:int=None, type:str=None) -> None:
-        self.id = id
-        self.owner_email = owner_email
-        self.owner_name = owner_name
-        self.health = health
-        self.last_update = last_update
-        self.type = type
+    def __init__(self, uuid:str, owner:str) -> None:
+        self.uuid = id
+        self.owner = owner
+        self.health = 0 #healthy
+        self.last_update = int(time.time())
+        self.type = None
 
 
-class VPS(Honeypot):
-    def __init__(self, id:str, owner_email:str, owner_name:str, health:str, last_update:str=None, os:str=None) -> None:
-        self.os = os
-        Honeypot.__init__(self,
-                         id = id,
-                         owner_email = owner_email,
-                         owner_name = owner_name, 
-                         health = health,
-                         last_update = last_update,
-                         type = "VPS")
+class HP_EC2(Honeypot):
+    def __init__(self, uuid:str, owner:str) -> None:
+        self.uuid = uuid
+        self.owner = owner
 
-class Database(Honeypot):
-    def __init__(self, id:str, owner_email:str, owner_name:str, health:str, last_update:str=None, db_engine:str=None) -> None:
-        self.db_engine = db_engine
-        Honeypot.__init__(self,
-                         id = id,
-                         owner_email = owner_email,
-                         owner_name = owner_name, 
-                         health = health,
-                         last_update = last_update,
-                         type = "Database")
+
+class HP_BottleRocket(Honeypot): 
+    def __init__(self, uuid:str, owner:str) -> None:
+        self.uuid = uuid
+        self.owner = owner
+
+
+class HP_ECS(Honeypot): 
+    def __init__(self, uuid:str, owner:str) -> None:
+        self.uuid = uuid
+        self.owner = owner
+
+
+class HP_Frost(Honeypot): 
+    def __init__(self, uuid:str, owner:str) -> None:
+        self.uuid = uuid
+        self.owner = owner
+
+
+class HP_Lambda(Honeypot): 
+    def __init__(self, uuid:str, owner:str) -> None:
+        self.uuid = uuid
+        self.owner = owner
+
+
+class HP_Deadline(Honeypot): 
+    def __init__(self, uuid:str, owner:str) -> None:
+        self.uuid = uuid
+        self.owner = owner
+
+
+class HP_Outpost(Honeypot): 
+    def __init__(self, uuid:str, owner:str) -> None:
+        self.uuid = uuid
+        self.owner = owner
+
+
+class HP_Parallel(Honeypot): 
+    def __init__(self, uuid:str, owner:str) -> None:
+        self.uuid = uuid
+        self.owner = owner
+
+
+class HP_Serverless(Honeypot): 
+    def __init__(self, uuid:str, owner:str) -> None:
+        self.uuid = uuid
+        self.owner = owner
+
+
+
+
+"""LEGACY"""
 
 
 def ingest_honeypots(config_file:str) -> None:
