@@ -84,6 +84,6 @@ def start_server(tls=True):
 
 
 if __name__ == '__main__':
-    aws_internal_session = AWS_Session()
+    #aws_internal_session = AWS_Session()
     #aws_internal_session.get_all_services()
     start_server()
