@@ -12,46 +12,29 @@ SERVER_PORT = 15001
 
 #honeypots = ingest_honeypots("data/honeypots.yaml")
 honeypots = {
-    '1Cbas2ZWQ8Kq': {
-        'type': 'VPS',
-        'os': 'Ubuntu 20.04',
+    '1a463804ea': {
+        'type': 'EC2',
         'owner': 12345,
         'updated': 1652508781,
         'health': 0
     },
-    'w8w5t32JFMzT': {
-        'type': 'VPS',
-        'os': 'Ubuntu 20.04',
+    '65bf0194ea': {
+        'type': 'LAMBDA',
         'owner': 12345,
-        'updated': 1653760662,
+        'updated': 1652508781,
         'health': 1
     },
-    'hFc8c7Hhr8wj': {
-        'type': 'Database',
-        'os': 'Ubuntu 20.04',
+    '6b5b0b7aea': {
+        'type': 'ECS',
         'owner': 12345,
-        'updated': 1651953237,
-        'health': 3
-    },
-    '0ooQzs78Aizu': {
-        'type': 'Database',
-        'db-engine': 'mysql',
-        'owner': 12345,
-        'updated': 1651993737,
-        'health': 0
-    },
-    '0SK8zO8VB8Wj': {
-        'type': 'NAS',
-        'owner': 12345,
-        'updated': 1651123437,
-        'health': 3
-    },
-    'qVAUYY6C67tv': {
-        'type': 'Database',
-        'db-engine': 'mysql',
-        'owner': 12345,
-        'updated': 1651933123,
+        'updated': 1652508781,
         'health': 2
+    },
+    '714c39aaea': {
+        'type': 'EC2',
+        'owner': 12345,
+        'updated': 1652508781,
+        'health': 3
     }
 }
 
@@ -60,15 +43,16 @@ class QueryServer(rpc.QueryServer):
     def __init__(self): pass
 
     def GetHoneypots(self, request, context):
-        print(f"[{datetime.now()}] QueryServer received gRPC call -- Retrieve Honeypots")
+        print(f"[{datetime.now()}] QueryServer received gRPC call -- retrieve honeypots")
         return query.Honeypots(HoneypotsAsJSON = json.dumps(honeypots), count = len(honeypots))
 
     def NewHoneypot(self, request, context):
-        print(f"[{datetime.now()}] QueryServer received gRPC call -- New Honeypot")
-        new_uuid = str(uuid.uuid1())[:12]
+        print(f"[{datetime.now()}] QueryServer received gRPC call -- creating new honeypot, type:{request.type}")
+        tempid = str(uuid.uuid1()).replace('-','')
+        new_uuid = tempid[:10]
 
         honeypots[new_uuid] = {
-                'type': 'NAS',
+                'type': request.type.upper(),
                 'owner': 12345,
                 'updated': int(time.time()),
                 'health': 0
@@ -78,21 +62,25 @@ class QueryServer(rpc.QueryServer):
 
 
 def start_server(tls=True):
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=1000))
-    rpc.add_QueryServerServicer_to_server(QueryServer(), server)
+    try:
+        server = grpc.server(futures.ThreadPoolExecutor(max_workers=1000))
+        rpc.add_QueryServerServicer_to_server(QueryServer(), server)
 
-    if tls:
-        with open('cert/server.key', 'rb') as fio: private_key = fio.read()
-        with open('cert/server.crt', 'rb') as fio: certificate_chain = fio.read()
-        
-        server_credentials = grpc.ssl_server_credentials(((private_key, certificate_chain),))   
-        server.add_secure_port(f"[::]:{SERVER_PORT}", server_credentials)
+        if tls:
+            with open('cert/server.key', 'rb') as fio: private_key = fio.read()
+            with open('cert/server.crt', 'rb') as fio: certificate_chain = fio.read()
+            
+            server_credentials = grpc.ssl_server_credentials(((private_key, certificate_chain),))   
+            server.add_secure_port(f"[::]:{SERVER_PORT}", server_credentials)
 
-    else:
-        server.add_insecure_port(f"[::]:{SERVER_PORT}")
+        else:
+            server.add_insecure_port(f"[::]:{SERVER_PORT}")
 
-    server.start()
-    server.wait_for_termination()
+        server.start()
+        server.wait_for_termination()
+    except KeyboardInterrupt:
+        print('\rTerminating Server')
+        exit()
 
 
 if __name__ == '__main__':
