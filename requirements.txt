@@ -1,1 +1,4 @@
+grpcio==1.46.3
 grpcio-tools==1.46.3
+PyYAML==6.0
+boto3==1.24.7
