@@ -63,7 +63,7 @@ class QueryServer(rpc.QueryServer):
 
 def start_server(tls=True):
     try:
-        server = grpc.server(futures.ThreadPoolExecutor(max_workers=1000))
+        server = grpc.server(futures.ThreadPoolExecutor(max_workers=100))
         rpc.add_QueryServerServicer_to_server(QueryServer(), server)
 
         if tls:
