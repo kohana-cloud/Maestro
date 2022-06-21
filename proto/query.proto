@@ -24,3 +24,14 @@ message StartHoneypot {
 message ReturnCode {
     uint32 errorCode = 1;
 }
+
+
+service HoneypotManagementServer {
+    rpc ChatStream (Empty) returns (stream Event);
+    rpc SendEvent (Event) returns (Empty);
+}
+
+message Event {
+    string type = 1;
+    string message = 2;
+}
