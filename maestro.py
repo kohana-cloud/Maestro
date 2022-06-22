@@ -17,25 +17,13 @@ honeypots = {
         'type': 'EC2',
         'owner': 12345,
         'updated': 1652508781,
-        'health': 0
+        'health': 1
     },
     '65bf0194ea': {
         'type': 'LAMBDA',
         'owner': 12345,
         'updated': 1652508781,
         'health': 1
-    },
-    '6b5b0b7aea': {
-        'type': 'ECS',
-        'owner': 12345,
-        'updated': 1652508781,
-        'health': 2
-    },
-    '714c39aaea': {
-        'type': 'EC2',
-        'owner': 12345,
-        'updated': 1652508781,
-        'health': 3
     }
 }
 
@@ -120,7 +108,7 @@ if __name__ == '__main__':
     try:
         # Create a process group to capture child processes
         os.setpgrp()
-        start_server()
+        start_server(tls=False)
 
     except KeyboardInterrupt:
         print('\r[KeyboardInterrupt] Terminating Server')
