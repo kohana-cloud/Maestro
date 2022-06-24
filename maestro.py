@@ -8,6 +8,8 @@ from datetime import datetime
 import json, time
 import random
 import os, signal
+from os.path import exists
+from src.configuration import Configuration
 
 SERVER_PORT = {'unary': 15001, 'bidirectional':15002}
 
@@ -70,18 +72,15 @@ class HoneypotManagementServer(rpc.HoneypotManagementServer):
 
 
 
-def start_server(tls=True):
+def start_server(configuration:object):
     unary_server = grpc.server(futures.ThreadPoolExecutor(max_workers=100))
     rpc.add_QueryServerServicer_to_server(QueryServer(), unary_server)
 
     bidirectional_server = grpc.server(futures.ThreadPoolExecutor(max_workers=1000))
     rpc.add_HoneypotManagementServerServicer_to_server(HoneypotManagementServer(), bidirectional_server)  # register the server to gRPC
 
-    if tls:
-        with open('cert/server.key', 'rb') as fio: private_key = fio.read()
-        with open('cert/server.crt', 'rb') as fio: certificate_chain = fio.read()
-        
-        server_credentials = grpc.ssl_server_credentials(((private_key, certificate_chain),))
+    if configuration.tls_enabled:        
+        server_credentials = grpc.ssl_server_credentials(((configuration.private_key, certificate_chain)))
 
         unary_server.add_secure_port(f"[::]:{SERVER_PORT['unary']}", server_credentials)
         bidirectional_server.add_secure_port(f"[::]:{SERVER_PORT['bidirectional']}", server_credentials)
@@ -105,10 +104,16 @@ def start_server(tls=True):
 if __name__ == '__main__':
     #aws_internal_session = AWS_Session()
     #aws_internal_session.get_all_services()
+
+    configuration = Configuration('configuration.yaml')
+    configuration.read_keys()
+
     try:
         # Create a process group to capture child processes
         os.setpgrp()
-        start_server(tls=False)
+
+        # Start server with provided configuration
+        start_server(configuration)
 
     except KeyboardInterrupt:
         print('\r[KeyboardInterrupt] Terminating Server')
