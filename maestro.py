@@ -64,6 +64,22 @@ class HoneypotManagementServer(rpc.HoneypotManagementServer):
 
         # Log to server
         print(f"[{datetime.now()}] {request.type} - {request.message}")
+
+        if request.type == "connection":
+            if request.message.split(':')[0] == "connect":
+                #live attacker present in machine
+                honeypots[request.message.split(':')[1]]['health'] = 3
+            elif request.message.split(':')[0] == "disconnect":
+                #live attacker no longer present in machine
+                honeypots[request.message.split(':')[1]]['health'] = 2
+
+        if request.type == "status":
+            if request.message.split(':')[0] == "alive":
+                #live attacker present in machine
+                honeypots[request.message.split(':')[1]]['health'] = 0
+            elif request.message.split(':')[0] == "dead":
+                #live attacker no longer present in machine
+                honeypots[request.message.split(':')[1]]['health'] = 1
         
         # Return something to the client honeypot
         return query.Empty()
@@ -88,10 +104,10 @@ def start_server(configuration:object):
         bidirectional_server.add_insecure_port(f"[::]:{SERVER_PORT['bidirectional']}")
 
     unary_server.start()
-    print(f"[{datetime.now()}] Started unary gRPC server")
+    print(f"[{datetime.now()}] started unary gRPC server")
 
     bidirectional_server.start()
-    print(f"[{datetime.now()}] Started bidirectional gRPC server")
+    print(f"[{datetime.now()}] started bidirectional gRPC server")
 
     unary_server.wait_for_termination()
     bidirectional_server.wait_for_termination()
