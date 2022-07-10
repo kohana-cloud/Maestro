@@ -15,13 +15,13 @@ SERVER_PORT = {'unary': 15001, 'bidirectional':15002}
 
 #honeypots = ingest_honeypots("data/honeypots.yaml")
 honeypots = {
-    '1a463804ea': {
+    '859a277c-f3ff-11ec-a661-000c2970a8e4': {
         'type': 'EC2',
         'owner': 12345,
         'updated': 1652508781,
         'health': 1
     },
-    '65bf0194ea': {
+    '92c75190-f3ff-11ec-a661-000c2970a8e4': {
         'type': 'LAMBDA',
         'owner': 12345,
         'updated': 1652508781,
@@ -39,14 +39,12 @@ class QueryServer(rpc.QueryServer):
 
     def NewHoneypot(self, request, context):
         print(f"[{datetime.now()}] QueryServer received gRPC call -- creating new honeypot, type:{request.type}")
-        tempid = str(uuid.uuid1()).replace('-','')
-        new_uuid = tempid[:10]
 
-        honeypots[new_uuid] = {
+        honeypots[str(uuid.uuid1())] = {
                 'type': request.type.upper(),
                 'owner': 12345,
                 'updated': int(time.time()),
-                'health': 0
+                'health': 1
                 }
         
         return query.ReturnCode()
