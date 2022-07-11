@@ -10,8 +10,10 @@ import random
 import os, signal
 from os.path import exists
 from src.configuration import Configuration
+from threading import Thread
 
 SERVER_PORT = {'unary': 15001, 'bidirectional':15002}
+HEALTH_CHECK_INTERVAL_SECONDS = 3
 
 #honeypots = ingest_honeypots("data/honeypots.yaml")
 honeypots = {
@@ -19,13 +21,15 @@ honeypots = {
         'type': 'EC2',
         'owner': 12345,
         'updated': 1652508781,
-        'health': 1
+        'health': 1,
+        'last_heartbeat': 0
     },
     '92c75190-f3ff-11ec-a661-000c2970a8e4': {
         'type': 'LAMBDA',
         'owner': 12345,
         'updated': 1652508781,
-        'health': 1
+        'health': 1,
+        'last_heartbeat': 0
     }
 }
 
@@ -44,7 +48,8 @@ class QueryServer(rpc.QueryServer):
                 'type': request.type.upper(),
                 'owner': 12345,
                 'updated': int(time.time()),
-                'health': 1
+                'health': 1,
+                'last_heartbeat': 0
                 }
         
         return query.ReturnCode()
@@ -69,20 +74,36 @@ class HoneypotManagementServer(rpc.HoneypotManagementServer):
             if request.message.split(':')[0] == "connect":
                 #live attacker present in machine
                 honeypots[request.message.split(':')[1]]['health'] = 3
+                honeypots[request.message.split(':')[1]]['updated'] = int(time.time())
             elif request.message.split(':')[0] == "disconnect":
                 #live attacker no longer present in machine
                 honeypots[request.message.split(':')[1]]['health'] = 2
+                honeypots[request.message.split(':')[1]]['updated'] = int(time.time())
 
         if request.type == "status":
-            if request.message.split(':')[0] == "alive":
-                #live attacker present in machine
-                honeypots[request.message.split(':')[1]]['health'] = 0
-            elif request.message.split(':')[0] == "dead":
-                #live attacker no longer present in machine
-                honeypots[request.message.split(':')[1]]['health'] = 1
+            if request.message.split(':')[0] == "heartbeat":
+                honeypots[request.message.split(':')[1]]['last_heartbeat'] = int(time.time())
+                
+                # Set healthy if currently degraded and recieves a heartbeat
+                if (honeypots[request.message.split(':')[1]]['health'] == 1): 
+                    honeypots[request.message.split(':')[1]]['health'] = 0
+                    honeypots[request.message.split(':')[1]]['updated'] = int(time.time())
         
         # Return something to the client honeypot
         return query.Empty()
+
+
+
+def degrade_unresponsive_honeypots():
+    while True:
+        current_time = int(time.time())
+        for honeypot in honeypots:
+            # check if the hp hasn't been updated in a bit
+            if (honeypots[honeypot]['last_heartbeat'] < (time.time() - 3)) and (honeypots[honeypot]['health'] == 0):
+                honeypots[honeypot]['health'] = 1
+                honeypots[honeypot]['updated'] = int(time.time())
+                
+        time.sleep(HEALTH_CHECK_INTERVAL_SECONDS)
 
 
 
@@ -109,8 +130,13 @@ def start_server(configuration:object):
     bidirectional_server.start()
     print(f"[{datetime.now()}] started bidirectional gRPC server")
 
+    health_monitor_thread = Thread(target=degrade_unresponsive_honeypots)
+    health_monitor_thread.start()
+    
+
     unary_server.wait_for_termination()
     bidirectional_server.wait_for_termination()
+    health_monitor_thread.join()
     
 
 
