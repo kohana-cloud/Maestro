@@ -117,12 +117,12 @@ def start_server(configuration:object):
     if configuration.tls_enabled:        
         server_credentials = grpc.ssl_server_credentials(((configuration.private_key, certificate_chain)))
 
-        unary_server.add_secure_port(f"[::]:{SERVER_PORT['unary']}", server_credentials)
-        bidirectional_server.add_secure_port(f"[::]:{SERVER_PORT['bidirectional']}", server_credentials)
+        unary_server.add_secure_port(f"0.0.0.0:{SERVER_PORT['unary']}", server_credentials)
+        bidirectional_server.add_secure_port(f"0.0.0.0:{SERVER_PORT['bidirectional']}", server_credentials)
 
     else:
-        unary_server.add_insecure_port(f"[::]:{SERVER_PORT['unary']}")
-        bidirectional_server.add_insecure_port(f"[::]:{SERVER_PORT['bidirectional']}")
+        unary_server.add_insecure_port(f"0.0.0.0:{SERVER_PORT['unary']}")
+        bidirectional_server.add_insecure_port(f"0.0.0.0:{SERVER_PORT['bidirectional']}")
 
     unary_server.start()
     print(f"[{datetime.now()}] started unary gRPC server")
