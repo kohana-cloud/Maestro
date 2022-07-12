@@ -2,6 +2,10 @@ import yaml
 import os
 
 class Configuration:
+    public_key = None
+    private_key = None
+    tls_enabled = None
+
     def __init__(self, config_file_relpath:str) -> None:
         # Store the config file path
         if os.path.exists(config_file_relpath):
