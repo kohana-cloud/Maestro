@@ -12,6 +12,8 @@ from os.path import exists
 from src.configuration import Configuration
 from threading import Thread
 
+from src.aws.service_ecs import aws_service_ecs_create, aws_service_ecs_delete, aws_service_ecs_stop, aws_service_ecs_start
+
 SERVER_PORT = {'unary': 15001, 'bidirectional':15002}
 HEALTH_CHECK_INTERVAL_SECONDS = 3
 
@@ -41,16 +43,37 @@ class QueryServer(rpc.QueryServer):
         print(f"[{datetime.now()}] QueryServer received gRPC call -- retrieve honeypots")
         return query.Honeypots(HoneypotsAsJSON = json.dumps(honeypots), count = len(honeypots))
 
-    def NewHoneypot(self, request, context):
-        print(f"[{datetime.now()}] QueryServer received gRPC call -- creating new honeypot, type:{request.type}")
+    def ControlHoneypot(self, request, context):
+        print(f"[{datetime.now()}] QueryServer received gRPC call -- creating new honeypot, type:{request.message}")
 
-        honeypots[str(uuid.uuid1())] = {
-                'type': request.type.upper(),
-                'owner': 12345,
-                'updated': int(time.time()),
-                'health': 1,
-                'last_heartbeat': 0
-                }
+        command_type = request.message.split(':')[0]
+
+        if (command_type == "create"):
+
+            new_hp_id = str(uuid.uuid1())
+
+            honeypots[new_hp_id] = {
+                    'type': request.message.split(':')[1].upper(),
+                    'owner': 12345,
+                    'updated': int(time.time()),
+                    'health': 1,
+                    'last_heartbeat': 0
+                    }
+
+            aws_service_ecs_create(new_hp_id, local_test=True)
+        elif (command_type == "delete"):
+            hpid = request.message.split(':')[1]
+            aws_service_ecs_delete(hpid, local_test=True)
+            honeypots.pop(hpid)
+        
+        elif (command_type == "stop"):
+            hpid = request.message.split(':')[1]
+            aws_service_ecs_stop(hpid, local_test=True)
+
+        elif (command_type == "start"):
+            hpid = request.message.split(':')[1]
+            aws_service_ecs_start(hpid, local_test=True)
+
         
         return query.ReturnCode()
 
