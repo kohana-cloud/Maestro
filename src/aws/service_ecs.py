@@ -5,13 +5,17 @@ from threading import Thread
 def aws_service_ecs_start(hpid:str, local_test=False):
 
 
-    # for local docker testing
-    if local_test:
-        os.system(f"/usr/bin/docker start {hpid}")
+    def start():
+        # for local docker testing
+        if local_test:
+            os.system(f"/usr/bin/docker start hp_{hpid}")
+
+    thread = Thread(target=start)
+    thread.start()
 
     
 def aws_service_ecs_stop(hpid:str, local_test=False):
-    
+
 
     def stop():
         # for local docker testing

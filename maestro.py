@@ -18,7 +18,9 @@ SERVER_PORT = {'unary': 15001, 'bidirectional':15002}
 HEALTH_CHECK_INTERVAL_SECONDS = 3
 
 #honeypots = ingest_honeypots("data/honeypots.yaml")
-honeypots = {
+
+honeypots = {}
+"""honeypots = {
     '859a277c-f3ff-11ec-a661-000c2970a8e4': {
         'type': 'EC2',
         'owner': 12345,
@@ -33,7 +35,7 @@ honeypots = {
         'health': 1,
         'last_heartbeat': 0
     }
-}
+}"""
 
 
 class QueryServer(rpc.QueryServer):
