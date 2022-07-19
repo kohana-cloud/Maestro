@@ -19,23 +19,42 @@ HEALTH_CHECK_INTERVAL_SECONDS = 3
 
 #honeypots = ingest_honeypots("data/honeypots.yaml")
 
-honeypots = {}
-"""honeypots = {
+#honeypots = {}
+honeypots = {
     '859a277c-f3ff-11ec-a661-000c2970a8e4': {
         'type': 'EC2',
-        'owner': 12345,
-        'updated': 1652508781,
+        'owner': 'c6f72742-f765-11ec-8c7a-75e0b7943059',
+        'updated': 1658117133,
         'health': 1,
-        'last_heartbeat': 0
+        'last_heartbeat': 0,
+        'interfaces:':
+            {
+                'eth':[],
+                'tun':[],
+                'wlan':[]
+            }
     },
     '92c75190-f3ff-11ec-a661-000c2970a8e4': {
-        'type': 'LAMBDA',
-        'owner': 12345,
-        'updated': 1652508781,
+        'type': 'S3',
+        'owner': 'c6f72742-f765-11ec-8c7a-75e0b7943059',
+        'updated': 1658117133,
+        'health': 1,
+        'last_heartbeat': 0,
+        'interfaces:':
+            {
+                'eth':[],
+                'tun':[],
+                'wlan':[]
+            }
+    },
+    'b5dd020a-0652-11ed-8900-000c2970a8e4': {
+        'type': 'ECS',
+        'owner': 'c6f72742-f765-11ec-8c7a-75e0b7943059',
+        'updated': 1658116273,
         'health': 1,
         'last_heartbeat': 0
     }
-}"""
+}
 
 
 class QueryServer(rpc.QueryServer):
@@ -56,7 +75,7 @@ class QueryServer(rpc.QueryServer):
 
             honeypots[new_hp_id] = {
                     'type': request.message.split(':')[1].upper(),
-                    'owner': 12345,
+                    'owner': 'c6f72742-f765-11ec-8c7a-75e0b7943059',
                     'updated': int(time.time()),
                     'health': 1,
                     'last_heartbeat': 0
